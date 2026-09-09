@@ -1,0 +1,215 @@
+{
+  "generated_on": "2026-09-09",
+  "asof": "2026-09-09",
+  "spot_usdinr": 95.095,
+  "sofr": 3.64,
+  "ccil_official_nss": {
+    "beta0": 8.2133,
+    "beta1": -2.854,
+    "beta2": -16.9917,
+    "beta3": 18.195,
+    "tau1": 6.8262,
+    "tau2": 7.0551
+  },
+  "curve": {
+    "n_instruments": 8,
+    "reprice_rmse_bp": 4.21,
+    "reprice_max_bp": 8.06,
+    "vs_ccil_rmse_bp": 13.4,
+    "vs_ccil_max_bp": 24.9,
+    "vs_bootstrap_rmse_bp": 7.9,
+    "fitted_nss": {
+      "beta0": 5.888960422611808,
+      "beta1": -1.7020875505968127,
+      "beta2": 0.0001845387779824806,
+      "beta3": 7.8391192975396615,
+      "tau1": 0.12818774503029648,
+      "tau2": 29.999795393690988
+    },
+    "fitted_nss_tau_bounded": {
+      "beta0": 8.871339622604246,
+      "beta1": -3.9936466156117234,
+      "beta2": 0.0001568870082018283,
+      "beta3": 2.6257103664307806,
+      "tau1": 7.7207034004744175,
+      "tau2": 1.0137591244677917
+    },
+    "tau_at_bound_unconstrained": true,
+    "zero_10y": 7.04,
+    "zero_1y": 5.6029,
+    "slope_1s10s_bp": 143.7
+  },
+  "sdl_spread_bp": {
+    "7.09% MAHARSHTRA SGS 2031": 73.2,
+    "7.63% GOA SGS 2036": 60.9,
+    "7.72% JHARKHAND SGS 2042": 23.3
+  },
+  "fx_forwards": {
+    "1M": {
+      "forward": 95.2195,
+      "points_paise": 12.5,
+      "premium_pct_pa": 1.571
+    },
+    "2M": {
+      "forward": 95.3317,
+      "points_paise": 23.7,
+      "premium_pct_pa": 1.493
+    },
+    "3M": {
+      "forward": 95.448,
+      "points_paise": 35.3,
+      "premium_pct_pa": 1.485
+    },
+    "6M": {
+      "forward": 95.8031,
+      "points_paise": 70.8,
+      "premium_pct_pa": 1.489
+    },
+    "9M": {
+      "forward": 96.1304,
+      "points_paise": 103.5,
+      "premium_pct_pa": 1.452
+    },
+    "12M": {
+      "forward": 96.4867,
+      "points_paise": 139.2,
+      "premium_pct_pa": 1.464
+    }
+  },
+  "realised_vol_1y": 7.34,
+  "options": {
+    "vol_used_pct": 7.34,
+    "atmf_1y_call_inr": 2.6722,
+    "atmf_1y_call_pct_of_spot": 2.81,
+    "collar_cap": 98.4165,
+    "collar_floor": 94.69,
+    "collar_band_paise": 372.6
+  },
+  "hedging": {
+    "exposure_usd_m": 12.0,
+    "budget_rate": 95.8481,
+    "table": [
+      {
+        "policy": "Unhedged",
+        "mean_rate": 96.9325,
+        "p95_rate": 101.8504,
+        "worst_1pct_rate": 104.2115,
+        "mean_cost_cr": 116.319,
+        "cfar_95_cr": 7.2027,
+        "std_cost_cr": 3.5089,
+        "vol_reduction_pct": 0.0,
+        "cost_vs_unhedged_cr": 0.0
+      },
+      {
+        "policy": "100% forward",
+        "mean_rate": 95.8481,
+        "p95_rate": 95.8481,
+        "worst_1pct_rate": 95.8481,
+        "mean_cost_cr": 115.0178,
+        "cfar_95_cr": 0.0,
+        "std_cost_cr": 0.0,
+        "vol_reduction_pct": 100.0,
+        "cost_vs_unhedged_cr": -1.3013
+      },
+      {
+        "policy": "Layered 100% to 30%",
+        "mean_rate": 96.3561,
+        "p95_rate": 98.5366,
+        "worst_1pct_rate": 99.5844,
+        "mean_cost_cr": 115.6274,
+        "cfar_95_cr": 3.2262,
+        "std_cost_cr": 1.5525,
+        "vol_reduction_pct": 55.7541,
+        "cost_vs_unhedged_cr": -0.6917
+      },
+      {
+        "policy": "Zero-cost collar (+2%)",
+        "mean_rate": 96.2552,
+        "p95_rate": 97.7404,
+        "worst_1pct_rate": 97.7651,
+        "mean_cost_cr": 115.5063,
+        "cfar_95_cr": 2.2708,
+        "std_cost_cr": 1.4401,
+        "vol_reduction_pct": 58.9576,
+        "cost_vs_unhedged_cr": -0.8127
+      },
+      {
+        "policy": "50% fwd + 50% call",
+        "mean_rate": 96.3786,
+        "p95_rate": 96.8027,
+        "worst_1pct_rate": 96.8027,
+        "mean_cost_cr": 115.6543,
+        "cfar_95_cr": 1.1455,
+        "std_cost_cr": 0.7485,
+        "vol_reduction_pct": 78.6696,
+        "cost_vs_unhedged_cr": -0.6647
+      }
+    ]
+  },
+  "risk": {
+    "position_usd_m": 10.0,
+    "var_es": {
+      "historical": {
+        "var_inr": 7791164.0,
+        "es_inr": 11229353.0,
+        "method": "historical"
+      },
+      "normal": {
+        "var_inr": 6770771.0,
+        "es_inr": 7772261.0,
+        "method": "normal"
+      },
+      "student_t": {
+        "var_inr": 8594591.0,
+        "es_inr": 13679862.0,
+        "method": "student-t(nu=2.8)"
+      }
+    },
+    "frtb_es_975_inr": 8439963.0,
+    "backtest": {
+      "n": 2600,
+      "exceptions": 33,
+      "expected": 26.0,
+      "rate": 0.0127,
+      "LR_pof": 1.7542,
+      "p_value": 0.1854,
+      "reject_5pct": false,
+      "LR_ind": 0.8488,
+      "p_value_ind": 0.3569,
+      "LR_cc": 2.603,
+      "p_value_cc": 0.2721,
+      "basel_zone_last250": "AMBER"
+    },
+    "worst_day_inr": -22021393.0,
+    "worst_day_date": "2026-08-25"
+  },
+  "pca": {
+    "explained_variance_ratio": {
+      "level": 0.7602,
+      "slope": 0.1082,
+      "curvature": 0.0451
+    },
+    "factor_vols_bp": {
+      "level": 12.39,
+      "slope": 4.67,
+      "curvature": 3.02
+    },
+    "window": "2024-01-02 to 2026-09-08",
+    "n_days": 671
+  },
+  "swaps": {
+    "2Y": {
+      "par_rate_pct": 5.9928,
+      "pv01_inr_per_bn": 194334.0
+    },
+    "5Y": {
+      "par_rate_pct": 6.5486,
+      "pv01_inr_per_bn": 441712.0
+    },
+    "10Y": {
+      "par_rate_pct": 7.1306,
+      "pv01_inr_per_bn": 742894.0
+    }
+  },
+  "usdinr_dxy_return_corr": 0.185
+}
