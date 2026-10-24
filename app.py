@@ -22,7 +22,7 @@ from imd.hedging import ExposureSchedule, HedgePolicy, compare_policies, simulat
 from imd.pricing import cip_forward, forward_points, garman_kohlhagen, zero_cost_collar  # noqa: E402
 from imd.pricing.rates import InterestRateSwap  # noqa: E402
 
-st.set_page_config(page_title="INR Markets Desk", layout="wide")
+st.set_page_config(page_title="Cost Exposure Simulation & Decision Tool", layout="wide")
 GRID = np.array([0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 25, 30])
 
 
@@ -43,11 +43,12 @@ usd = ZeroCurve.from_nodes(np.asarray(ust_last.index, float), ust_last.to_numpy(
 spot_live = float(fx.iloc[-1])
 returns = np.log(fx).diff().dropna()
 
-st.title("INR Markets Desk")
+st.title("Cost Exposure Simulation & Decision Tool")
 st.caption(
-    f"INR sovereign curve from CCIL's published ZCYC (as of {zcyc.iloc[0]['date'].date()}), "
-    f"USD curve from the US Treasury daily par curve, USD/INR spot from live quotes. "
-    "Every number below is computed at load time — nothing is hard-coded."
+    f"What a year of dollar-denominated purchasing costs, and which policy a finance team "
+    f"should pick. Built from live public data as of {zcyc.iloc[0]['date'].date()} "
+    "(CCIL, US Treasury, live FX quotes) — every number is computed at load time, "
+    "nothing is hard-coded."
 )
 
 spot = st.sidebar.number_input("USD/INR spot", value=round(spot_live, 4), step=0.05, format="%.4f")
