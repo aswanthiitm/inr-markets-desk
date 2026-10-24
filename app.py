@@ -28,15 +28,27 @@ GRID = np.array([0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 25, 30])
 
 @st.cache_data(ttl=3600)
 def load():
-    yields = fetch_ccil_tenorwise_yields()
-    yields = yields[yields["date"] == yields["date"].max()]
+    """Pull every input, recording whether each came from the live source or a snapshot.
+
+    Some hosts are blocked by the data providers. Rather than fail, the adapters fall back
+    to real captures committed in `data/snapshots/`; this reports which happened so the
+    page never implies a number is live when it is not.
+    """
+    raw_yields = fetch_ccil_tenorwise_yields()
+    yields = raw_yields[raw_yields["date"] == raw_yields["date"].max()]
     zcyc = fetch_ccil_zcyc_params()
-    ust = fetch_ust_curve([2026]).iloc[-1]
+    ust_full = fetch_ust_curve([2026])
     fx = fetch_yahoo_series("USDINR", "10y")
-    return yields, zcyc, ust, fx
+    provenance = {
+        "CCIL yields": (raw_yields.attrs.get("source", "live"), raw_yields.attrs.get("as_of")),
+        "CCIL curve": (zcyc.attrs.get("source", "live"), zcyc.attrs.get("as_of")),
+        "US Treasury": (ust_full.attrs.get("source", "live"), str(ust_full.index[-1].date())),
+        "USD/INR": (fx.attrs.get("source", "live"), str(fx.index[-1].date())),
+    }
+    return yields, zcyc, ust_full.iloc[-1], fx, provenance
 
 
-yields, zcyc, ust_last, fx = load()
+yields, zcyc, ust_last, fx, provenance = load()
 official = nss_from_ccil(zcyc.iloc[0])
 inr = ZeroCurve.from_nss(official, "continuous", "CCIL ZCYC")
 usd = ZeroCurve.from_nodes(np.asarray(ust_last.index, float), ust_last.to_numpy(), "continuous")
@@ -46,14 +58,26 @@ returns = np.log(fx).diff().dropna()
 st.title("Cost Exposure Simulation & Decision Tool")
 st.caption(
     f"What a year of dollar-denominated purchasing costs, and which policy a finance team "
-    f"should pick. Built from live public data as of {zcyc.iloc[0]['date'].date()} "
-    "(CCIL, US Treasury, live FX quotes) — every number is computed at load time, "
+    f"should pick. Built from public market data as of {zcyc.iloc[0]['date'].date()} "
+    "(CCIL, US Treasury, FX quotes) — every number is computed at load time, "
     "nothing is hard-coded."
 )
 
 spot = st.sidebar.number_input("USD/INR spot", value=round(spot_live, 4), step=0.05, format="%.4f")
 vol = st.sidebar.slider("USD/INR volatility (%)", 3.0, 15.0,
                         float(round(returns.tail(252).std() * np.sqrt(252) * 100, 1)), 0.1) / 100
+_stale = {k: v for k, v in provenance.items() if v[0] == "snapshot"}
+if _stale:
+    st.warning(
+        "Live data could not be reached for "
+        + ", ".join(f"**{k}** (snapshot from {v[1]})" for k, v in _stale.items())
+        + ". These are real captures committed to the repository, not invented numbers — "
+        "but they are dated."
+        + (" Every other input below is live."
+           if len(_stale) < len(provenance) else
+           " No input on this page is live right now.")
+    )
+
 tab1, tab2, tab3, tab4 = st.tabs(["Curve", "FX forwards", "Structures", "Hedge policy"])
 
 with tab1:

@@ -19,7 +19,25 @@ import re
 
 import pandas as pd
 
+from ..config import SNAPSHOTS
 from ._http import get
+
+
+def _latest_snapshot(prefix: str) -> pd.DataFrame | None:
+    """Most recent committed snapshot for a CCIL series, or None if there is none.
+
+    CCIL blocks requests from some hosts (a cloud deployment's IP, for instance). The
+    snapshots in ``data/snapshots/`` are real captures committed to the repo, so a hosted
+    copy degrades to a dated-but-genuine curve instead of crashing. Anything served this
+    way is tagged in ``frame.attrs`` so the caller can say so on screen.
+    """
+    files = sorted(SNAPSHOTS.glob(f"{prefix}_*.csv"))
+    if not files:
+        return None
+    frame = pd.read_csv(files[-1], parse_dates=["date"])
+    frame.attrs["source"] = "snapshot"
+    frame.attrs["as_of"] = str(frame["date"].max().date())
+    return frame
 
 ZCYC_URL = "https://www.ccilindia.com/zcyc-parameters"
 TENORWISE_URL = "https://www.ccilindia.com/tenorwise-indicative-yields"
@@ -45,7 +63,13 @@ def fetch_ccil_zcyc_params(cache: bool = True) -> pd.DataFrame:
     Returns columns ``[date, beta0, beta1, beta2, beta3, tau1, tau2]``, most recent
     first. Betas are in percent; taus are in years.
     """
-    frame = _first_data_table(get(ZCYC_URL, cache=cache), "Date")
+    try:
+        frame = _first_data_table(get(ZCYC_URL, cache=cache), "Date")
+    except Exception:  # noqa: BLE001 - blocked or unreachable; fall back to a real capture
+        snapshot = _latest_snapshot("ccil_zcyc")
+        if snapshot is None:
+            raise
+        return snapshot
     frame = frame.rename(columns={c: str(c).strip() for c in frame.columns})
     cols = list(frame.columns)
     frame = frame.rename(
@@ -55,7 +79,10 @@ def fetch_ccil_zcyc_params(cache: bool = True) -> pd.DataFrame:
     frame["date"] = pd.to_datetime(frame["date"]).dt.normalize()
     for c in frame.columns[1:]:
         frame[c] = pd.to_numeric(frame[c], errors="coerce")
-    return frame.dropna().sort_values("date", ascending=False).reset_index(drop=True)
+    out = frame.dropna().sort_values("date", ascending=False).reset_index(drop=True)
+    out.attrs["source"] = "live"
+    out.attrs["as_of"] = str(out["date"].max().date())
+    return out
 
 
 # Tenor buckets as published by CCIL -> representative maturity in years.
@@ -91,7 +118,13 @@ def fetch_ccil_tenorwise_yields(cache: bool = True) -> pd.DataFrame:
     where ``segment`` is one of ``TBILL``/``GSEC``/``SDL``, ``ytm`` and ``coupon`` are
     in percent, and ``tenor_years`` is the time to maturity used for curve fitting.
     """
-    frame = _first_data_table(get(TENORWISE_URL, cache=cache), "Tenor")
+    try:
+        frame = _first_data_table(get(TENORWISE_URL, cache=cache), "Tenor")
+    except Exception:  # noqa: BLE001 - see _latest_snapshot
+        snapshot = _latest_snapshot("ccil_yields")
+        if snapshot is None:
+            raise
+        return snapshot
     cols = list(frame.columns)
     frame = frame.rename(columns=dict(zip(cols[:4], ["date", "bucket", "security", "ytm"])))
     frame = frame[["date", "bucket", "security", "ytm"]].copy()
@@ -118,4 +151,7 @@ def fetch_ccil_tenorwise_yields(cache: bool = True) -> pd.DataFrame:
 
     frame["tenor_years"] = frame.apply(_tenor, axis=1)
     frame["bucket_years"] = frame["bucket"].map(_BUCKET_YEARS)
-    return frame.sort_values(["date", "segment", "tenor_years"]).reset_index(drop=True)
+    out = frame.sort_values(["date", "segment", "tenor_years"]).reset_index(drop=True)
+    out.attrs["source"] = "live"
+    out.attrs["as_of"] = str(out["date"].max().date())
+    return out

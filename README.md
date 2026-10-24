@@ -212,6 +212,20 @@ to ₹7.43 lakh at 10.
 
 ---
 
+## Running it somewhere other than your laptop
+
+CCIL blocks requests from some hosts, including cloud data-centre IPs. Rather than crash,
+each adapter falls back to a **real capture committed in `data/snapshots/`** and the app
+says so on screen — which source fell back, and how old the capture is. Nothing is invented
+and nothing silently pretends to be live.
+
+To refresh the captures from a machine that *can* reach the sources:
+
+```bash
+python scripts/snapshot.py          # CCIL curve history
+python scripts/run_analysis.py      # refreshes everything else
+```
+
 ## What this deliberately does not claim
 
 - **Eight instruments is not the traded universe.** CCIL fits its official curve off all of

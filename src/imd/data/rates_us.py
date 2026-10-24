@@ -11,7 +11,10 @@ import json
 
 import pandas as pd
 
+from ..config import SNAPSHOTS
 from ._http import get
+
+UST_SNAPSHOT = SNAPSHOTS / "ust_curve.csv"
 
 UST_CSV = (
     "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/"
@@ -33,6 +36,15 @@ def fetch_ust_curve(years: list[int] | int, cache: bool = True) -> pd.DataFrame:
     if isinstance(years, int):
         years = [years]
     frames = []
+    try:
+        _ = get(UST_CSV.format(year=years[0]), cache=cache)
+    except Exception:  # noqa: BLE001 - unreachable; fall back to the committed capture
+        if UST_SNAPSHOT.exists():
+            snap = pd.read_csv(UST_SNAPSHOT, index_col=0, parse_dates=True)
+            snap.columns = [float(c) for c in snap.columns]
+            snap.attrs["source"] = "snapshot"
+            return snap
+        raise
     for year in years:
         text = get(UST_CSV.format(year=year), cache=cache)
         frame = pd.read_csv(io.StringIO(text))
@@ -42,7 +54,9 @@ def fetch_ust_curve(years: list[int] | int, cache: bool = True) -> pd.DataFrame:
         frame = frame[keep].rename(columns=UST_TENORS)
         frames.append(frame)
     out = pd.concat(frames).sort_index()
-    return out.loc[:, sorted(out.columns)]
+    out = out.loc[:, sorted(out.columns)]
+    out.attrs["source"] = "live"
+    return out
 
 
 def fetch_sofr(n: int = 100, cache: bool = True) -> pd.Series:
